@@ -9,7 +9,7 @@
     <!--or something similar.-->
     <string name="app_name">Sunshine</string>
     <string name="refresh">Refresh</string>
-    <string name="error_loading_data">Error Loading Data..</string>
+    <string name="error_loading_data">An Error has occurred. Please try again by clicking refresh</string>
     <!-- - - - - - - - - - - - - -->
     <!--Used by SunshineDateUtils-->
     <!-- - - - - - - - - - - - - -->
