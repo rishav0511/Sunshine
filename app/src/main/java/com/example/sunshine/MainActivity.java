@@ -2,6 +2,8 @@ package com.example.sunshine;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -10,17 +12,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.sunshine.data.SunshinePreferences;
 import com.example.sunshine.utilities.NetworkUtils;
 import com.example.sunshine.utilities.OpenWeatherJsonUtils;
 
-import java.io.IOException;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
-    TextView mWeatherTextView;
+    RecyclerView mRecyclerView;
+    private ForecastAdapter mForecastAdapter;
     TextView mErrorMessageTextView;
     ProgressBar mLoadingBar;
 
@@ -28,7 +29,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mWeatherTextView = (TextView) findViewById(R.id.tv_weather_data);
+
+        mRecyclerView=(RecyclerView)findViewById(R.id.recycler_view_forecast);
+        //setting linearlayoutmanager for recycler View
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false);
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setHasFixedSize(true);
+        // adapter for recycler view
+        mForecastAdapter=new ForecastAdapter();
+        mRecyclerView.setAdapter(mForecastAdapter);
+
         mErrorMessageTextView=(TextView)findViewById(R.id.error_loading_data);
         mLoadingBar=(ProgressBar)findViewById(R.id.pb_loading_indicator);
         loadWeatherData();
@@ -42,10 +52,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int itemselected = item.getItemId();
-        if(itemselected==R.id.action_refresh){
+        int itemSelected = item.getItemId();
+        if(itemSelected==R.id.action_refresh){
             loadWeatherData();
-            Toast.makeText(this,"Refreshed", Toast.LENGTH_SHORT).show();
+            mForecastAdapter.setWeatherData(null);
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -56,12 +67,14 @@ public class MainActivity extends AppCompatActivity {
         String location = SunshinePreferences.getPreferredWeatherLocation(this);
         new sunShineAsyncTask().execute(location);
     }
+    //show weather data if data fetched
     public void showWeatherDataView(){
         mErrorMessageTextView.setVisibility(View.INVISIBLE);
-        mWeatherTextView.setVisibility(View.VISIBLE);
+        mRecyclerView.setVisibility(View.VISIBLE);
     }
+    // show error message if no data fetched
     public void showErrorMessage(){
-        mWeatherTextView.setVisibility(View.INVISIBLE);
+        mRecyclerView.setVisibility(View.INVISIBLE);
         mErrorMessageTextView.setVisibility(View.VISIBLE);
     }
     public class sunShineAsyncTask extends AsyncTask<String,Void,String[]>
@@ -86,16 +99,14 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         }
-
+        // calling showWeatherData() or showErrorMessage()
+        // depending on data fetched
         @Override
         protected void onPostExecute(String[] weatherData) {
             mLoadingBar.setVisibility(View.INVISIBLE);
            if(weatherData!=null){
                showWeatherDataView();
-               for(String weatherstring:weatherData)
-               {
-                   mWeatherTextView.append((weatherstring)+"\n\n\n");
-               }
+               mForecastAdapter.setWeatherData(weatherData);
            } else {
                showErrorMessage();
            }
