@@ -14,20 +14,48 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
 
     // array of string to store data
     private String[] mWeatherData;
-    public ForecastAdapter(){
+    /*
+     * An on-click handler that we've defined to make it easy for an Activity to interface with
+     * our RecyclerView
+     */
+    private final ForecastAdapterOnClickHandler mClickHandler;
 
+    /**
+     * The interface that receives onClick messages.
+     */
+    public interface ForecastAdapterOnClickHandler {
+        void onClick(String weatherForDay);
+
+    }
+
+    /**
+     * Creates a ForecastAdapter.
+     *
+     * @param clickHandler The on-click handler for this adapter. This single handler is called
+     *                     when an item is clicked.
+     */
+    public ForecastAdapter(ForecastAdapterOnClickHandler clickHandler){
+        mClickHandler=clickHandler;
     }
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder).
      */
-    public class ForecastAdapterViewHolder extends RecyclerView.ViewHolder
+    public class ForecastAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
         public TextView mWeatherTextView;
 
         public ForecastAdapterViewHolder(@NonNull View itemView) {
             super(itemView);
             mWeatherTextView=itemView.findViewById(R.id.tv_weather_data);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int adapterPosition = getAdapterPosition();
+            String weatherForDay=mWeatherData[adapterPosition];
+            mClickHandler.onClick(weatherForDay);
         }
     }
 
