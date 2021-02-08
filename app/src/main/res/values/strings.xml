@@ -24,7 +24,8 @@
     <string name="format_full_friendly_date">
         <xliff:g id="month">%1$s</xliff:g>, <xliff:g id="day">%2$s</xliff:g>
     </string>
-
+    <string name="action_map">Map Location</string>
+    <string name="action_share">Share </string>
 
     <!-- - - - - - - - - - - - - - - -->
     <!-- Used by SunshineWeatherUtils-->

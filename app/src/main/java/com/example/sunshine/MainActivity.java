@@ -6,8 +6,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
     private ForecastAdapter mForecastAdapter;
     TextView mErrorMessageTextView;
     ProgressBar mLoadingBar;
+    private static String TAG= MainActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,9 +63,23 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
             mForecastAdapter.setWeatherData(null);
             return true;
         }
+        if(itemSelected==R.id.action_map){
+            openLocationInMap();
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
-
+    private void openLocationInMap(){
+        String address="1600 Ampitheatre Parkway, CA";
+        Uri geoLocation = Uri.parse("geo:0,0?q="+address);
+        Intent intent =new Intent(Intent.ACTION_VIEW);
+        intent.setData(geoLocation);
+        if(intent.resolveActivity(getPackageManager())!=null){
+            startActivity(intent);
+        } else {
+            Log.d(TAG,"Couldn't call "+geoLocation.toString()+", no receiving apps installed!");
+        }
+    }
     public void loadWeatherData(){
 
         showWeatherDataView();
