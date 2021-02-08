@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -81,6 +82,8 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
 
     @Override
     public void onClick(String weatherForDay) {
+        Intent intent = new Intent(MainActivity.this,DetailsActivity.class);
+        startActivity(intent);
         Toast.makeText(this,"Clicked", Toast.LENGTH_SHORT).show();
     }
 
