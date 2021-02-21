@@ -2,6 +2,7 @@ package com.example.sunshine;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -9,6 +10,7 @@ import android.app.LoaderManager;
 import android.content.AsyncTaskLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,12 +28,13 @@ import com.example.sunshine.utilities.OpenWeatherJsonUtils;
 
 import java.net.URL;
 
-public class MainActivity extends AppCompatActivity implements ForecastAdapter.ForecastAdapterOnClickHandler, LoaderManager.LoaderCallbacks<String []> {
+public class MainActivity extends AppCompatActivity implements ForecastAdapter.ForecastAdapterOnClickHandler, LoaderManager.LoaderCallbacks<String []>, SharedPreferences.OnSharedPreferenceChangeListener {
     RecyclerView mRecyclerView;
     private ForecastAdapter mForecastAdapter;
     TextView mErrorMessageTextView;
     ProgressBar mLoadingBar;
     public static final int LOADER_ID=0;
+    private static boolean PREFERENCE_UPDATED=false;
     private static String TAG= MainActivity.class.getSimpleName();
 
     @Override
@@ -66,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
          */
         Bundle bundleForLoader=null;
         getLoaderManager().initLoader(LOADER_ID,bundleForLoader,callback);
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -123,6 +127,36 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        if(PREFERENCE_UPDATED){
+            getLoaderManager().restartLoader(LOADER_ID,null,this);
+            PREFERENCE_UPDATED=false;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        PREFERENCE_UPDATED=true;
+        /*
+         * Set this flag to true so that when control returns to MainActivity, it can refresh the
+         * data.
+         *
+         * This isn't the ideal solution because there really isn't a need to perform another
+         * GET request just to change the units, but this is the simplest solution that gets the
+         * job done for now. Later in this course, we are going to show you more elegant ways to
+         * handle converting the units from celsius to fahrenheit and back without hitting the
+         * network again by keeping a copy of the data in a manageable format.
+         */
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.forecast, menu);
         return true;
@@ -157,7 +191,8 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
     }
 
     private void openLocationInMap(){
-        String address="1600 Ampitheatre Parkway, CA";
+
+        String address=SunshinePreferences.getPreferredWeatherLocation(this);
         Uri geoLocation = Uri.parse("geo:0,0?q="+address);
         Intent intent =new Intent(Intent.ACTION_VIEW);
         intent.setData(geoLocation);
@@ -186,5 +221,6 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
         startActivity(intent);
         Toast.makeText(this,"Clicked", Toast.LENGTH_SHORT).show();
     }
+
 
 }
