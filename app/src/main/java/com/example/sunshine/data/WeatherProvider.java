@@ -4,10 +4,13 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.example.sunshine.utilities.SunshineDateUtils;
 
 public class WeatherProvider extends ContentProvider {
 
@@ -30,9 +33,50 @@ public class WeatherProvider extends ContentProvider {
         return true;
     }
 
+    /**
+     * Handles requests to insert a set of new rows. In Sunshine, we are only going to be
+     * inserting multiple rows of data at a time from a weather forecast. There is no use case
+     * for inserting a single row of data into our ContentProvider, and so we are only going to
+     * implement bulkInsert. In a normal ContentProvider's implementation, you will probably want
+     * to provide proper functionality for the insert method as well.
+     *
+     * @param uri    The content:// URI of the insertion request.
+     * @param values An array of sets of column_name/value pairs to add to the database.
+     *               This must not be {@code null}.
+     *
+     * @return The number of values that were inserted.
+     */
     @Override
     public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
-        return super.bulkInsert(uri, values);
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        switch (sUriMatcher.match(uri)){
+            case CODE_WEATHER:{
+                db.beginTransaction();
+                int rowsInserted=0;
+                try{
+                    for(ContentValues value:values){
+                        long weatherDate=value.getAsLong(WeatherContract.WeatherEntry.COLUMN_DATE);
+                        if(!SunshineDateUtils.isDateNormalized(weatherDate)){
+                            throw new IllegalArgumentException("Date must be normalized to insert");
+                        }
+                        long _id=db.insert(WeatherContract.WeatherEntry.TABLE_NAME,null,value);
+                        if(_id!=-1){
+                            rowsInserted++;
+                        }
+                    }
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+                if(rowsInserted>0){
+                    getContext().getContentResolver().notifyChange(uri,null);
+                }
+                return rowsInserted;
+            }
+            default:
+                return super.bulkInsert(uri, values);
+        }
+
     }
 
     @Nullable
