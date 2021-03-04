@@ -29,10 +29,10 @@ import com.example.sunshine.utilities.OpenWeatherJsonUtils;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity implements ForecastAdapter.ForecastAdapterOnClickHandler, LoaderManager.LoaderCallbacks<String []>, SharedPreferences.OnSharedPreferenceChangeListener {
-    RecyclerView mRecyclerView;
+    private RecyclerView mRecyclerView;
     private ForecastAdapter mForecastAdapter;
-    TextView mErrorMessageTextView;
-    ProgressBar mLoadingBar;
+    private TextView mErrorMessageTextView;
+    private ProgressBar mLoadingBar;
     public static final int LOADER_ID=0;
     private static boolean PREFERENCE_UPDATED=false;
     private static String TAG= MainActivity.class.getSimpleName();
@@ -90,8 +90,7 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
 
             @Override
             public String[] loadInBackground() {
-                String locationQuery=SunshinePreferences.getPreferredWeatherLocation(MainActivity.this);
-                URL weatherURL = NetworkUtils.buildUrl(locationQuery);
+                URL weatherURL = NetworkUtils.getUrl(MainActivity.this);
                 try {
                     String weatherResults=NetworkUtils.getResponseFromHttpUrl(weatherURL);
                     String [] simpleJsonWeatherData=OpenWeatherJsonUtils.getSimpleWeatherStringsFromJson(MainActivity.this,weatherResults);
