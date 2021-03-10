@@ -27,7 +27,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
      * The interface that receives onClick messages.
      */
     public interface ForecastAdapterOnClickHandler {
-        void onClick(String weatherForDay);
+        void onClick(long date);
 
     }
 
@@ -56,10 +56,19 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
             itemView.setOnClickListener(this);
         }
 
+        /**
+         * This gets called by the child views during a click. We fetch the date that has been
+         * selected, and then call the onClick handler registered with this adapter, passing that
+         * date.
+         *
+         * @param v the View that was clicked
+         */
         @Override
         public void onClick(View v) {
-            String weatherSummary = mWeatherTextView.getText().toString();
-            mClickHandler.onClick(weatherSummary);
+            int adapterPosition = getAdapterPosition();
+            mCursor.moveToPosition(adapterPosition);
+            long dateInMillis = mCursor.getLong(MainActivity.INDEX_WEATHER_DATE);
+            mClickHandler.onClick(dateInMillis);
         }
     }
 

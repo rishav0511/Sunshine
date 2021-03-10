@@ -190,9 +190,10 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
         mLoadingBar.setVisibility(View.VISIBLE);
     }
     @Override
-    public void onClick(String weatherForDay) {
+    public void onClick(long date) {
         Intent intent = new Intent(MainActivity.this,DetailsActivity.class);
-        intent.putExtra(Intent.EXTRA_TEXT,weatherForDay);
+        Uri uriForDateClicked = WeatherContract.WeatherEntry.buildWeatherUriWithDate(date);
+        intent.setData(uriForDateClicked);
         startActivity(intent);
         Toast.makeText(this,"Clicked", Toast.LENGTH_SHORT).show();
     }
