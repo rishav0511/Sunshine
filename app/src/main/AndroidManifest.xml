@@ -12,7 +12,8 @@
         android:supportsRtl="true"
 
         android:theme="@style/Theme.Sunshine">
-        <activity android:name=".SettingsActivity"/>
+        <activity android:name=".SettingsActivity"
+            android:parentActivityName=".MainActivity"/>
         <activity
             android:name=".DetailsActivity"
             android:parentActivityName=".MainActivity"/>
@@ -27,6 +28,8 @@
         <provider
             android:authorities="com.example.sunshine"
             android:name=".data.WeatherProvider"
+            android:exported="false"/>
+        <service android:name=".sync.SunshineSyncIntentService"
             android:exported="false"/>
     </application>
 

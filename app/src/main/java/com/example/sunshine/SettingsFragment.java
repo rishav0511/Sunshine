@@ -33,7 +33,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     //method to make setPreference's summary
     private void setPreferenceSummary(Preference preference,Object value){
         String stringValue=value.toString();
-        String key=preference.getKey();
         if(preference instanceof ListPreference){
             /* For list preferences, look up the correct display value in */
             /* the preference's 'entries' list (since they have separate labels/values). */

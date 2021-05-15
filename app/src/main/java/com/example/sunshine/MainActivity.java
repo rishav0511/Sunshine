@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.LoaderManager;
+import android.content.ActivityNotFoundException;
 import android.content.AsyncTaskLoader;
 import android.content.ContentProvider;
 import android.content.CursorLoader;
@@ -26,6 +27,7 @@ import android.widget.Toast;
 
 import com.example.sunshine.data.SunshinePreferences;
 import com.example.sunshine.data.WeatherContract;
+import com.example.sunshine.sync.SunshineSyncUtils;
 import com.example.sunshine.utilities.FakeDataUtils;
 import com.example.sunshine.utilities.NetworkUtils;
 import com.example.sunshine.utilities.OpenWeatherJsonUtils;
@@ -67,9 +69,6 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FakeDataUtils.insertFakeData(this);
-
-
         mRecyclerView=(RecyclerView)findViewById(R.id.recycler_view_forecast);
         //setting linearlayoutmanager for recycler View
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false);
@@ -83,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
 
         showLoading();
         getLoaderManager().initLoader(LOADER_ID,null,this);
+        SunshineSyncUtils.startImmediateSync(this);
     }
 
     @Override
@@ -140,10 +140,6 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemSelected = item.getItemId();
-        if(itemSelected==R.id.action_refresh){
-            getLoaderManager().initLoader(LOADER_ID,null,this);
-            return true;
-        }
         if(itemSelected==R.id.action_map){
             openLocationInMap();
             return true;
@@ -164,10 +160,20 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
         Uri geoLocation = Uri.parse("geo:0,0?q="+address);
         Intent intent =new Intent(Intent.ACTION_VIEW);
         intent.setData(geoLocation);
-        if(intent.resolveActivity(getPackageManager())!=null){
+//        if(intent.resolveActivity(getPackageManager())!=null){
+//            startActivity(intent);
+//        } else {
+//            Log.d(TAG,"Couldn't call "+geoLocation.toString()+", no receiving apps installed!");
+//            Toast.makeText(
+//                    this,
+//                    "No application can handle the link",
+//                    Toast.LENGTH_SHORT
+//            ).show();
+//        }
+        try {
             startActivity(intent);
-        } else {
-            Log.d(TAG,"Couldn't call "+geoLocation.toString()+", no receiving apps installed!");
+        } catch (ActivityNotFoundException e){
+            e.printStackTrace();
         }
     }
 
