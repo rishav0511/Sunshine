@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
 
         showLoading();
         getLoaderManager().initLoader(LOADER_ID,null,this);
-        SunshineSyncUtils.startImmediateSync(this);
+        SunshineSyncUtils.initialize(this);
     }
 
     @Override
